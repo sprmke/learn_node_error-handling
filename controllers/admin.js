@@ -72,6 +72,7 @@ exports.postAddProduct = (req, res, next) => {
     imageUrl: imageUrl,
     userId: req.user,
   });
+
   product
     .save()
     .then((result) => {
@@ -80,6 +81,19 @@ exports.postAddProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
+      // // re-render page with error
+      // res.status(500).render('admin/edit-product', {
+      //   pageTitle: 'Add Product',
+      //   path: '/admin/add-product',
+      //   editing: false,
+      //   product: product,
+      //   hasError: true,
+      //   errorMessage: 'nulDatabase operation failed, please try again.',
+      //   validationErrors: {},
+      // });
+
+      // redirect to 500 error page
+      res.redirect('/500');
     });
 };
 
