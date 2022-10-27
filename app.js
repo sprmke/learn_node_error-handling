@@ -45,6 +45,16 @@ app.use(csrfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+app.use((req, res, next) => {
+  // Throwing new error on sync task
+  // will be handled on our error handling middleware
+  // throw new Error('Sync Error');
+
   if (!req.session.user) {
     return next();
   }
@@ -57,17 +67,15 @@ app.use((req, res, next) => {
       next();
     })
     .catch((err) => {
-      throw new Error(err);
       console.log(err);
+      // throw new Error will not work for async task
+      // throw new Error(err);
+
+      // the Error should be passed inside next()
+      // for our error handling middleware to handle it
+      next(new Error(err));
     });
 });
-
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
-
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
@@ -77,8 +85,12 @@ app.use(errorController.get404);
 
 // express error handling middleware
 app.use((error, req, res, next) => {
-  // res.status(error.httpStatusCode).render();
-  res.redirect('/500');
+  // res.redirect('/500');
+  res.status(500).render('500', {
+    pageTitle: 'Error!',
+    path: '/500',
+    isAuthenticated: req.session.isLoggedIn,
+  });
 });
 
 mongoose
