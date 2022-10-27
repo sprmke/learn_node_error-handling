@@ -93,7 +93,10 @@ exports.postAddProduct = (req, res, next) => {
       // });
 
       // redirect to 500 error page
-      res.redirect('/500');
+      // res.redirect('/500');
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
